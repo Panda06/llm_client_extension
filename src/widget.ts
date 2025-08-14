@@ -272,6 +272,7 @@ print("=== LLM REQUEST END ===")
     
     future.onIOPub = (msg) => {
       console.log('📨 IOPub сообщение:', msg);
+      console.log('msg_type:', msg.header.msg_type);
       
       if (msg.header.msg_type === 'stream') {
         const content = (msg as any).content;
@@ -284,19 +285,32 @@ print("=== LLM REQUEST END ===")
           // Если в тексте есть полный ответ - извлекаем его
           if (text.includes('LLM_RESPONSE_START') && text.includes('LLM_RESPONSE_END')) {
             console.log('🎯 Полный ответ в одном сообщении');
-            const startIndex = text.indexOf('LLM_RESPONSE_START') + 'LLM_RESPONSE_START'.length;
-            const endIndex = text.indexOf('LLM_RESPONSE_END');
+            console.log('📄 Длина текста:', text.length);
             
-            if (startIndex > -1 && endIndex > startIndex) {
+            const startMarker = 'LLM_RESPONSE_START';
+            const endMarker = 'LLM_RESPONSE_END';
+            const startIndex = text.indexOf(startMarker) + startMarker.length;
+            const endIndex = text.indexOf(endMarker);
+            
+            console.log('🔍 startIndex:', startIndex, 'endIndex:', endIndex);
+            
+            if (startIndex > startMarker.length - 1 && endIndex > startIndex) {
               const extractedResponse = text.substring(startIndex, endIndex).trim();
-              console.log('✂️ Извлеченный ответ:', extractedResponse);
+              console.log('✂️ Извлеченный ответ длина:', extractedResponse.length);
+              console.log('✂️ Первые 100 символов:', extractedResponse.substring(0, 100));
               
               const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
               if (responseDiv) {
+                console.log('📺 responseDiv найден:', responseDiv);
                 responseDiv.innerHTML = this.formatMarkdown(extractedResponse);
+                console.log('📺 HTML установлен в responseDiv');
+              } else {
+                console.log('❌ responseDiv НЕ найден!');
               }
               this.showStatus('✅ Ответ получен', 'success');
               console.log('✅ Ответ установлен в UI');
+            } else {
+              console.log('❌ Неправильные индексы для извлечения');
             }
             return;
           }
