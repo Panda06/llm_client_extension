@@ -274,6 +274,8 @@ except Exception as e:
               const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
               if (responseDiv) {
                 responseDiv.innerHTML = this.formatMarkdown(extractedResponse);
+                // Сохраняем оригинальный текст для вставки
+                responseDiv.setAttribute('data-original-text', extractedResponse);
               }
               this.showStatus('✅ Ответ получен', 'success');
             }
@@ -402,6 +404,10 @@ except Exception as e:
       return;
     }
 
+    // Используем оригинальный текст вместо textContent
+    const originalText = responseDiv.getAttribute('data-original-text');
+    const plainText = originalText || responseDiv.textContent || responseDiv.innerText || '';
+    
     // Используем ту же логику что и в sendRequestViaKernel
     const notebookPanel = this.app.shell.currentWidget as any;
     const sessionContext = notebookPanel?.sessionContext;
@@ -422,7 +428,7 @@ except Exception as e:
       }
 
       // Convert HTML back to plain text (remove HTML formatting)
-      const plainText = responseDiv.textContent || responseDiv.innerText || '';
+      // const plainText = responseDiv.textContent || responseDiv.innerText || '';
       
       // Insert the text into the active cell  
       const editor = activeCell.editor;
@@ -463,5 +469,23 @@ except Exception as e:
       console.error('Insert to cell error:', error);
       this.showStatus('❌ Ошибка вставки в ячейку', 'error');
     }
+  }
+
+  private htmlToPlainText(html: string): string {
+    // Создаем временный элемент для конвертации
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // Заменяем <br> на переносы строк
+    tempDiv.querySelectorAll('br').forEach(br => {
+      br.replaceWith('\n');
+    });
+    
+    // Заменяем </p>, </div>, </h1-6> на переносы строк  
+    tempDiv.innerHTML = tempDiv.innerHTML
+      .replace(/<\/(p|div|h[1-6])>/g, '\n')
+      .replace(/<\/pre>/g, '\n');
+    
+    return tempDiv.textContent || tempDiv.innerText || '';
   }
 }
