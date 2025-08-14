@@ -424,17 +424,37 @@ except Exception as e:
       // Convert HTML back to plain text (remove HTML formatting)
       const plainText = responseDiv.textContent || responseDiv.innerText || '';
       
-      // Insert the text into the active cell
+      // Insert the text into the active cell  
       const editor = activeCell.editor;
       if (editor) {
-        // Получаем модель ячейки и добавляем текст в конец
-        const cellModel = activeCell.model;
-        if (cellModel) {
-          const currentValue = cellModel.value.text;
-          cellModel.value.text = currentValue + (currentValue ? '\n' : '') + plainText;
-          this.showStatus('✅ Текст вставлен в ячейку', 'success');
-        } else {
-          this.showStatus('❌ Нет доступа к модели ячейки', 'error');
+        try {
+          // Способ 1: Через модель ячейки
+          const cellModel = activeCell.model;
+          if (cellModel && cellModel.value) {
+            const currentValue = cellModel.value.text || cellModel.sharedModel.getSource();
+            const newValue = currentValue + (currentValue ? '\n' : '') + plainText;
+            cellModel.value.text = newValue;
+            this.showStatus('✅ Текст вставлен в ячейку', 'success');
+          } else {
+            // Способ 2: Прямо через editor (если CodeMirror)
+            if (editor.replaceSelection) {
+              editor.replaceSelection(plainText);
+              this.showStatus('✅ Текст вставлен в ячейку', 'success');
+            } else {
+              // Способ 3: Через setValue
+              const currentValue = editor.model?.value?.text || '';
+              editor.model?.value?.insert(currentValue.length, plainText);
+              this.showStatus('✅ Текст вставлен в ячейку', 'success');
+            }
+          }
+        } catch (error) {
+          console.error('Detailed insert error:', error);
+          // Способ 4: Самый простой fallback
+          navigator.clipboard.writeText(plainText).then(() => {
+            this.showStatus('📋 Скопировано в буфер. Вставьте Ctrl+V', 'success');
+          }).catch(() => {
+            this.showStatus('❌ Ошибка вставки. Скопируйте вручную', 'error');
+          });
         }
       } else {
         this.showStatus('❌ Нет доступа к редактору ячейки', 'error');
