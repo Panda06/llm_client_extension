@@ -310,11 +310,21 @@ except Exception as e:
   }
 
   private formatMarkdown(text: string): string {
-    // Simple markdown-like formatting
+    // Улучшенное форматирование markdown
     return text
+      // Блоки кода (```code```)
+      .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+      // Инлайн код (`code`)
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      // Жирный текст
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Курсив
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code>$1</code>')
+      // Заголовки
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      // Переносы строк
       .replace(/\n/g, '<br>');
   }
 
@@ -417,9 +427,15 @@ except Exception as e:
       // Insert the text into the active cell
       const editor = activeCell.editor;
       if (editor) {
-        const cursor = editor.getCursorPosition();
-        editor.replaceRange(cursor, cursor, plainText);
-        this.showStatus('✅ Текст вставлен в ячейку', 'success');
+        // Получаем модель ячейки и добавляем текст в конец
+        const cellModel = activeCell.model;
+        if (cellModel) {
+          const currentValue = cellModel.value.text;
+          cellModel.value.text = currentValue + (currentValue ? '\n' : '') + plainText;
+          this.showStatus('✅ Текст вставлен в ячейку', 'success');
+        } else {
+          this.showStatus('❌ Нет доступа к модели ячейки', 'error');
+        }
       } else {
         this.showStatus('❌ Нет доступа к редактору ячейки', 'error');
       }
