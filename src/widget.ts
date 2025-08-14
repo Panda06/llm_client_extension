@@ -72,7 +72,7 @@ export class LLMClientWidget extends Widget {
     const insertBtn = this.node.querySelector('#llm-insert-btn') as HTMLButtonElement;
     const promptArea = this.node.querySelector('#llm-prompt') as HTMLTextAreaElement;
 
-    sendBtn?.addEventListener('click', () => this.sendRequest());
+    sendBtn?.addEventListener('click', () => this.sendRequestViaKernel());
     clearBtn?.addEventListener('click', () => this.clearResponse());
     insertBtn?.addEventListener('click', () => this.insertToCell());
 
@@ -80,7 +80,7 @@ export class LLMClientWidget extends Widget {
     promptArea?.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
-        this.sendRequest();
+        this.sendRequestViaKernel();
       }
     });
 
