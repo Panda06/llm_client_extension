@@ -1,0 +1,279 @@
+.jp-LLMClientWidget {
+  min-width: 300px;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-LLMClientWidget h3 {
+  color: var(--jp-ui-font-color1);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-LLMClientWidget h4 {
+  color: var(--jp-ui-font-color1);
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+}
+
+.jp-LLMClientWidget input,
+.jp-LLMClientWidget textarea {
+  background: var(--jp-input-background);
+  border: 1px solid var(--jp-border-color1);
+  color: var(--jp-ui-font-color1);
+  border-radius: 3px;
+}
+
+.jp-LLMClientWidget input:focus,
+.jp-LLMClientWidget textarea:focus {
+  border-color: var(--jp-brand-color1);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--jp-brand-color1);
+}
+
+.jp-LLMClientWidget button {
+  background: var(--jp-brand-color1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 3px;
+  font-family: var(--jp-ui-font-family);
+}
+
+.jp-LLMClientWidget button:hover {
+  background: var(--jp-brand-color0);
+}
+
+.jp-LLMClientWidget button:disabled {
+  background: var(--jp-layout-color3);
+  cursor: not-allowed;
+}
+
+.jp-LLMClientWidget .history-item {
+  background: var(--jp-layout-color2);
+  border: 1px solid var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-LLMClientWidget .history-item:hover {
+  background: var(--jp-layout-color3);
+}
+
+.jp-LLMClientWidget label {
+  color: var(--jp-ui-font-color2);
+  font-weight: 500;
+}
+
+.llm-client-widget {
+  padding: 16px;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  overflow-y: auto;
+  font-family: var(--jp-ui-font-family);
+}
+
+.thinking-area {
+  background: var(--jp-layout-color2);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px 0;
+  font-family: var(--jp-code-font-family);
+  font-size: 0.9em;
+  color: var(--jp-ui-font-color2);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.timing-area {
+  color: var(--jp-ui-font-color2);
+  font-size: 0.8em;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.response-area {
+  background: var(--jp-layout-color0);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px 0;
+  min-height: 60px;
+  font-family: var(--jp-ui-font-family);
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+
+.response-area code {
+  background: var(--jp-layout-color2);
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-family: var(--jp-code-font-family);
+}
+
+.llm-client-container .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.llm-client-container .form-group input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Enhanced styling for the LLM Client */
+.llm-client-container {
+  max-width: 100%;
+}
+
+.llm-client-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--jp-brand-color1);
+}
+
+.llm-client-header h3 {
+  margin: 0;
+  color: var(--jp-brand-color1);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.llm-client-form .form-group {
+  margin-bottom: 16px;
+}
+
+.llm-client-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--jp-ui-font-color2);
+}
+
+.llm-client-form input,
+.llm-client-form textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 6px;
+  background: var(--jp-input-background);
+  color: var(--jp-ui-font-color1);
+  font-family: var(--jp-ui-font-family);
+  font-size: 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.llm-client-form input:focus,
+.llm-client-form textarea:focus {
+  outline: none;
+  border-color: var(--jp-brand-color1);
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.llm-client-form textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.4;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--jp-ui-font-family);
+}
+
+.btn-primary {
+  background: var(--jp-brand-color1);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--jp-brand-color0);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.btn-secondary {
+  background: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
+  border: 1px solid var(--jp-border-color1);
+}
+
+.btn-secondary:hover {
+  background: var(--jp-layout-color3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.response-area {
+  background: var(--jp-layout-color0);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  min-height: 100px;
+  font-family: var(--jp-ui-font-family);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.response-area:empty::before {
+  content: "Response will appear here...";
+  color: var(--jp-ui-font-color3);
+  font-style: italic;
+}
+
+.status-area {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  margin: 8px 0;
+  transition: all 0.3s ease;
+}
+
+.status-area.info {
+  background: rgba(33, 150, 243, 0.1);
+  color: var(--jp-brand-color1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.status-area.success {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.status-area.error {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+#llm-insert-btn {
+  width: 100%;
+  margin-top: 8px;
+}

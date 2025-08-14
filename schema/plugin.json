@@ -1,0 +1,17 @@
+{
+  "title": "LLM Client Extension",
+  "description": "Settings for LLM Client Extension",
+  "type": "object",
+  "properties": {
+    "apiUrl": {
+      "type": "string",
+      "default": "http://localhost:11434/v1/chat/completions",
+      "description": "Default API URL for LLM requests"
+    },
+    "model": {
+      "type": "string", 
+      "default": "llama2",
+      "description": "Default model name"
+    }
+  }
+}
