@@ -388,33 +388,26 @@ except Exception as e:
   private insertToCell(): void {
     const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
     if (!responseDiv || !responseDiv.textContent) {
-      this.showStatus('❌ No response to insert', 'error');
+      this.showStatus('❌ Нет ответа для вставки', 'error');
       return;
     }
 
-    // Get the current notebook panel
-    const shell = this.app.shell;
-    const currentWidget = shell.currentWidget;
-
-    if (!currentWidget || !currentWidget.hasClass('jp-Notebook')) {
-      this.showStatus('❌ No active notebook found', 'error');
+    // Используем ту же логику что и в sendRequestViaKernel
+    const notebookPanel = this.app.shell.currentWidget as any;
+    const sessionContext = notebookPanel?.sessionContext;
+    
+    if (!sessionContext || !notebookPanel.content) {
+      this.showStatus('❌ Нет активного notebook. Откройте notebook!', 'error');
       return;
     }
 
     try {
-      // Access the notebook through the widget
-      const notebookPanel = currentWidget as any;
       const notebook = notebookPanel.content;
       
-      if (!notebook) {
-        this.showStatus('❌ Cannot access notebook content', 'error');
-        return;
-      }
-
       // Get the active cell
       const activeCell = notebook.activeCell;
       if (!activeCell) {
-        this.showStatus('❌ No active cell found', 'error');
+        this.showStatus('❌ Нет активной ячейки', 'error');
         return;
       }
 
@@ -426,13 +419,13 @@ except Exception as e:
       if (editor) {
         const cursor = editor.getCursorPosition();
         editor.replaceRange(cursor, cursor, plainText);
-        this.showStatus('✅ Text inserted to cell', 'success');
+        this.showStatus('✅ Текст вставлен в ячейку', 'success');
       } else {
-        this.showStatus('❌ Cannot access cell editor', 'error');
+        this.showStatus('❌ Нет доступа к редактору ячейки', 'error');
       }
     } catch (error) {
       console.error('Insert to cell error:', error);
-      this.showStatus('❌ Failed to insert to cell', 'error');
+      this.showStatus('❌ Ошибка вставки в ячейку', 'error');
     }
   }
 }
