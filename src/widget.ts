@@ -200,7 +200,97 @@ export class LLMClientWidget extends Widget {
     }
   }
 
+  private async sendRequestViaKernel(): Promise<void> {
+    const host = (this.node.querySelector('#llm-host') as HTMLInputElement)?.value?.trim();
+    const port = (this.node.querySelector('#llm-port') as HTMLInputElement)?.value?.trim();
+    const model = (this.node.querySelector('#llm-model') as HTMLInputElement)?.value?.trim();
+    const prompt = (this.node.querySelector('#llm-prompt') as HTMLTextAreaElement)?.value?.trim();
 
+    // Получаем активную сессию kernel
+    const notebookPanel = this.app.shell.currentWidget as any;
+    const sessionContext = notebookPanel?.sessionContext;
+    
+    if (!sessionContext || !sessionContext.session?.kernel) {
+      this.showStatus('❌ Нет активного kernel', 'error');
+      return;
+    }
+
+    const kernel = sessionContext.session.kernel;
+    
+    // Python код для отправки запроса
+    const pythonCode = `
+import requests
+import json
+
+try:
+    response = requests.post(
+        f"http://${host}:${port}/v1/chat/completions",
+        json={
+            "model": "${model}",
+            "messages": [{"role": "user", "content": """${prompt} /no_think"""}],
+            "stream": False,
+            "max_tokens": 32000,
+            "temperature": 0.6,
+            "top_p": 0.95
+        },
+        timeout=30
+    )
+    
+    if response.status_code == 200:
+        result = response.json()
+        content = result['choices'][0]['message']['content']
+        print("LLM_RESPONSE_START")
+        print(content)
+        print("LLM_RESPONSE_END")
+    else:
+        print(f"LLM_ERROR: HTTP {response.status_code}: {response.text}")
+        
+except Exception as e:
+    print(f"LLM_ERROR: {str(e)}")
+  `;
+
+    // Выполняем код в kernel
+    const future = kernel.requestExecute({ code: pythonCode });
+    
+    this.showStatus('⏳ Отправка через kernel...', 'info');
+    
+    let responseText = '';
+    let isCapturing = false;
+    
+    future.onIOPub = (msg) => {
+      if (msg.header.msg_type === 'stream') {
+        const content = (msg as any).content;
+        if (content.name === 'stdout') {
+          const text = content.text;
+          
+          if (text.includes('LLM_RESPONSE_START')) {
+            isCapturing = true;
+            return;
+          }
+          
+          if (text.includes('LLM_RESPONSE_END')) {
+            isCapturing = false;
+            // Показываем результат
+            const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
+            if (responseDiv) {
+              responseDiv.innerHTML = this.formatMarkdown(responseText);
+            }
+            this.showStatus('✅ Ответ получен', 'success');
+            return;
+          }
+          
+          if (text.includes('LLM_ERROR:')) {
+            this.showStatus('❌ ' + text.replace('LLM_ERROR:', '').trim(), 'error');
+            return;
+          }
+          
+          if (isCapturing) {
+            responseText += text;
+          }
+        }
+      }
+    };
+  }
 
   private formatMarkdown(text: string): string {
     // Simple markdown-like formatting
