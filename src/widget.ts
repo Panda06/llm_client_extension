@@ -189,28 +189,44 @@ export class LLMClientWidget extends Widget {
   }
 
   private async sendRequestViaKernel(): Promise<void> {
+    console.log('🔥 sendRequestViaKernel запущен');
+    
     const host = (this.node.querySelector('#llm-host') as HTMLInputElement)?.value?.trim();
     const port = (this.node.querySelector('#llm-port') as HTMLInputElement)?.value?.trim();
     const model = (this.node.querySelector('#llm-model') as HTMLInputElement)?.value?.trim();
     const prompt = (this.node.querySelector('#llm-prompt') as HTMLTextAreaElement)?.value?.trim();
 
+    console.log('📝 Параметры:', { host, port, model, prompt });
+
+    if (!host || !port || !model || !prompt) {
+      this.showStatus('❌ Заполните все поля', 'error');
+      return;
+    }
+
     // Получаем активную сессию kernel
     const notebookPanel = this.app.shell.currentWidget as any;
+    console.log('📋 Текущий виджет:', notebookPanel);
+    
     const sessionContext = notebookPanel?.sessionContext;
+    console.log('🔗 Session context:', sessionContext);
     
     if (!sessionContext || !sessionContext.session?.kernel) {
-      this.showStatus('❌ Нет активного kernel', 'error');
+      this.showStatus('❌ Нет активного kernel. Откройте notebook!', 'error');
+      console.log('❌ Kernel не найден');
       return;
     }
 
     const kernel = sessionContext.session.kernel;
+    console.log('🐍 Kernel найден:', kernel);
     
     // Python код для отправки запроса
     const pythonCode = `
+print("=== LLM REQUEST START ===")
 import requests
 import json
 
 try:
+    print(f"Отправка запроса к http://${host}:${port}/v1/chat/completions")
     response = requests.post(
         f"http://${host}:${port}/v1/chat/completions",
         json={
@@ -224,6 +240,8 @@ try:
         timeout=30
     )
     
+    print(f"Status code: {response.status_code}")
+    
     if response.status_code == 200:
         result = response.json()
         content = result['choices'][0]['message']['content']
@@ -235,10 +253,17 @@ try:
         
 except Exception as e:
     print(f"LLM_ERROR: {str(e)}")
+    import traceback
+    traceback.print_exc()
+
+print("=== LLM REQUEST END ===")
   `;
+
+    console.log('📤 Отправляем Python код:', pythonCode);
 
     // Выполняем код в kernel
     const future = kernel.requestExecute({ code: pythonCode });
+    console.log('🚀 Future создан:', future);
     
     this.showStatus('⏳ Отправка через kernel...', 'info');
     
@@ -246,17 +271,24 @@ except Exception as e:
     let isCapturing = false;
     
     future.onIOPub = (msg) => {
+      console.log('📨 IOPub сообщение:', msg);
+      
       if (msg.header.msg_type === 'stream') {
         const content = (msg as any).content;
+        console.log('📺 Stream content:', content);
+        
         if (content.name === 'stdout') {
           const text = content.text;
+          console.log('📝 stdout text:', text);
           
           if (text.includes('LLM_RESPONSE_START')) {
+            console.log('🟢 Начинаем захват ответа');
             isCapturing = true;
             return;
           }
           
           if (text.includes('LLM_RESPONSE_END')) {
+            console.log('🔴 Заканчиваем захват ответа');
             isCapturing = false;
             // Показываем результат
             const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
@@ -264,19 +296,30 @@ except Exception as e:
               responseDiv.innerHTML = this.formatMarkdown(responseText);
             }
             this.showStatus('✅ Ответ получен', 'success');
+            console.log('✅ Ответ установлен в UI');
             return;
           }
           
           if (text.includes('LLM_ERROR:')) {
+            console.log('❌ Ошибка LLM:', text);
             this.showStatus('❌ ' + text.replace('LLM_ERROR:', '').trim(), 'error');
             return;
           }
           
           if (isCapturing) {
+            console.log('📋 Добавляем к ответу:', text);
             responseText += text;
           }
         }
       }
+    };
+
+    future.onDone = () => {
+      console.log('✅ Future завершен');
+    };
+
+    future.onReply = (msg) => {
+      console.log('💬 Reply сообщение:', msg);
     };
   }
 
