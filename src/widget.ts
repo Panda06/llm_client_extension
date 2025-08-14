@@ -106,7 +106,6 @@ export class LLMClientWidget extends Widget {
     const port = (this.node.querySelector('#llm-port') as HTMLInputElement)?.value?.trim();
     const model = (this.node.querySelector('#llm-model') as HTMLInputElement)?.value?.trim();
     const prompt = (this.node.querySelector('#llm-prompt') as HTMLTextAreaElement)?.value?.trim();
-    const useHttps = (this.node.querySelector('#llm-https') as HTMLInputElement)?.checked;
     const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
 
     if (!host || !port || !model || !prompt) {
@@ -115,8 +114,7 @@ export class LLMClientWidget extends Widget {
     }
 
     // Construct API URL with proper protocol
-    const protocol = useHttps ? 'https' : 'http';
-    const apiUrl = `${protocol}://${host}:${port}/v1/chat/completions`;
+    const apiUrl = `http://${host}:${port}/v1/chat/completions`;
 
     // Clear previous results
     if (responseDiv) responseDiv.innerHTML = '';
