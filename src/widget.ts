@@ -281,6 +281,27 @@ print("=== LLM REQUEST END ===")
           const text = content.text;
           console.log('📝 stdout text:', text);
           
+          // Если в тексте есть полный ответ - извлекаем его
+          if (text.includes('LLM_RESPONSE_START') && text.includes('LLM_RESPONSE_END')) {
+            console.log('🎯 Полный ответ в одном сообщении');
+            const startIndex = text.indexOf('LLM_RESPONSE_START') + 'LLM_RESPONSE_START'.length;
+            const endIndex = text.indexOf('LLM_RESPONSE_END');
+            
+            if (startIndex > -1 && endIndex > startIndex) {
+              const extractedResponse = text.substring(startIndex, endIndex).trim();
+              console.log('✂️ Извлеченный ответ:', extractedResponse);
+              
+              const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
+              if (responseDiv) {
+                responseDiv.innerHTML = this.formatMarkdown(extractedResponse);
+              }
+              this.showStatus('✅ Ответ получен', 'success');
+              console.log('✅ Ответ установлен в UI');
+            }
+            return;
+          }
+          
+          // Старая логика для разделенных сообщений
           if (text.includes('LLM_RESPONSE_START')) {
             console.log('🟢 Начинаем захват ответа');
             isCapturing = true;
@@ -290,7 +311,6 @@ print("=== LLM REQUEST END ===")
           if (text.includes('LLM_RESPONSE_END')) {
             console.log('🔴 Заканчиваем захват ответа');
             isCapturing = false;
-            // Показываем результат
             const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
             if (responseDiv) {
               responseDiv.innerHTML = this.formatMarkdown(responseText);
