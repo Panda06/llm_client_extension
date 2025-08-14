@@ -37,6 +37,13 @@ export class LLMClientWidget extends Widget {
         </div>
         
         <div class="form-group">
+          <label style="display: flex; align-items: center;">
+            <input type="checkbox" id="llm-https" style="margin-right: 8px;" />
+            Use HTTPS
+          </label>
+        </div>
+        
+        <div class="form-group">
           <label>Model:</label>
           <input type="text" id="llm-model" placeholder="vllm_model" />
         </div>
@@ -89,22 +96,27 @@ export class LLMClientWidget extends Widget {
       const el = this.node.querySelector(`#${id}`) as HTMLInputElement;
       el?.addEventListener('input', () => this.saveSettings());
     });
+    
+    const httpsCheckbox = this.node.querySelector('#llm-https') as HTMLInputElement;
+    httpsCheckbox?.addEventListener('change', () => this.saveSettings());
   }
 
   private async sendRequest(): Promise<void> {
-    const host = (this.node.querySelector('#llm-host') as HTMLInputElement)?.value;
-    const port = (this.node.querySelector('#llm-port') as HTMLInputElement)?.value;
-    const model = (this.node.querySelector('#llm-model') as HTMLInputElement)?.value;
-    const prompt = (this.node.querySelector('#llm-prompt') as HTMLTextAreaElement)?.value;
+    const host = (this.node.querySelector('#llm-host') as HTMLInputElement)?.value?.trim();
+    const port = (this.node.querySelector('#llm-port') as HTMLInputElement)?.value?.trim();
+    const model = (this.node.querySelector('#llm-model') as HTMLInputElement)?.value?.trim();
+    const prompt = (this.node.querySelector('#llm-prompt') as HTMLTextAreaElement)?.value?.trim();
+    const useHttps = (this.node.querySelector('#llm-https') as HTMLInputElement)?.checked;
     const responseDiv = this.node.querySelector('#llm-response') as HTMLDivElement;
 
     if (!host || !port || !model || !prompt) {
-      this.showStatus('❌ Please fill host, port, model and prompt', 'error');
+      this.showStatus('❌ Заполните все поля', 'error');
       return;
     }
 
-    // Construct API URL from host and port
-    const apiUrl = `http://${host}:${port}/v1/chat/completions`;
+    // Construct API URL with proper protocol
+    const protocol = useHttps ? 'https' : 'http';
+    const apiUrl = `${protocol}://${host}:${port}/v1/chat/completions`;
 
     // Clear previous results
     if (responseDiv) responseDiv.innerHTML = '';
@@ -224,7 +236,8 @@ export class LLMClientWidget extends Widget {
     const settings = {
       host: (this.node.querySelector('#llm-host') as HTMLInputElement)?.value || '10.1.5.1',
       port: (this.node.querySelector('#llm-port') as HTMLInputElement)?.value || '1088',
-      model: (this.node.querySelector('#llm-model') as HTMLInputElement)?.value || 'vllm_model'
+      model: (this.node.querySelector('#llm-model') as HTMLInputElement)?.value || 'vllm_model',
+      https: (this.node.querySelector('#llm-https') as HTMLInputElement)?.checked || false
     };
     
     localStorage.setItem('llm-client-settings', JSON.stringify(settings));
@@ -249,6 +262,11 @@ export class LLMClientWidget extends Widget {
         if (settings.model) {
           const modelInput = this.node.querySelector('#llm-model') as HTMLInputElement;
           if (modelInput) modelInput.value = settings.model;
+        }
+        
+        if (settings.https !== undefined) {
+          const httpsInput = this.node.querySelector('#llm-https') as HTMLInputElement;
+          if (httpsInput) httpsInput.checked = settings.https;
         }
       } catch (e) {
         console.warn('Failed to load settings:', e);
